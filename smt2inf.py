@@ -95,25 +95,27 @@ class AssertStmt(Stmt):
     def __init__(self, name, serialized):
         super().__init__(name, serialized)
 
-    def parse_stmt(self):
+    def parse_stmt(self, tokens):
         substmts = []
-        for token in self.tokens:
+        for token in tokens:
             if isinstance(token, str):
                 # if token can be ignored, ignore it
                 # all smt2 tokens are ignored
                 if token in self.ignore_tokens_list:
                     continue
                 # if the token is the arg let's save it
-                elif token == self.name:
-                    tname = token
                 else:
                     raise ValueError("Unexpected token: " + token)
+            if token == "let":
+                print(token)
+                ttype = token[0]
             # Now, I have only seen Arrays usually
             # so I am ignoring the rest 
             elif isinstance(token, list):
                 # if it's an array, it should have 2 elements
-                if token[0] == "Array":
-                    ttype = token[0]
+                substmts.append(self.parse_stmt(token))
+        return substmts
+
 
 def parse_one_file(filename : str):
     """
@@ -137,7 +139,7 @@ def parse_declares(stmts):
 def parse_asserts(stmts):
     for stmt in stmts:
         astmt = AssertStmt("ASSERT", stmt.serialize_to_string())
-        print(astmt.parse_stmt())
+        print(astmt.parse_stmt(astmt.tokens))
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

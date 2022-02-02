@@ -1,0 +1,15 @@
+(set-logic QF_AUFBV )
+(declare-fun foo_arg_0_dynSize () (Array (_ BitVec 32) (_ BitVec 8) ) )
+(declare-fun foo_arg_1 () (Array (_ BitVec 32) (_ BitVec 8) ) )
+(declare-fun foo_arg_2 () (Array (_ BitVec 32) (_ BitVec 8) ) )
+(assert 
+(let 
+    ( (?B1 foo_arg_1 ) )
+    (and 
+        (and (= (_ bv5 32) (bvurem foo_arg_0_dynSize (_ bv129 32) ) ) (bvslt ?B1 foo_arg_2 ) ) 
+        (= (_ bv131068 32) ((_ extract 31 0) (bvmul (_ bv4 64) ((_ sign_extend 32) ?B1 ) ) ) ) 
+    ) 
+)
+)
+(check-sat)
+(exit)
