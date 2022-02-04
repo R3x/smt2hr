@@ -13,3 +13,9 @@
 )
 (check-sat)
 (exit)
+
+
+
+- foo_arg_0_dynSize % 129 == 5
+- foo_arg_2 < foo_arg_1
+- foo_arg_2 * 4 == 131068

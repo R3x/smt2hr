@@ -94,27 +94,46 @@ class AssertStmt(Stmt):
 
     def __init__(self, name, serialized):
         super().__init__(name, serialized)
+        self.handlers = {
+            "let" : self.let_handler,
+            "concat" : self.concat_handler,
+            "select" : self.select_handler,
+        }
+
+    def get_token(self):
+        for token in self.tokens:
+            yield token
+
 
     def parse_stmt(self, tokens):
         substmts = []
+        print(tokens)
         for token in tokens:
             if isinstance(token, str):
                 # if token can be ignored, ignore it
                 # all smt2 tokens are ignored
                 if token in self.ignore_tokens_list:
                     continue
+                if token in self.handlers:
+                    self.handlers[token]()
                 # if the token is the arg let's save it
                 else:
                     raise ValueError("Unexpected token: " + token)
-            if token == "let":
-                print(token)
-                ttype = token[0]
             # Now, I have only seen Arrays usually
             # so I am ignoring the rest 
             elif isinstance(token, list):
                 # if it's an array, it should have 2 elements
                 substmts.append(self.parse_stmt(token))
         return substmts
+
+    def let_handler(self):
+        print("let")
+
+    def concat_handler(self):
+        print("concat")
+
+    def select_handler(self):
+        print("select")
 
 
 def parse_one_file(filename : str):
