@@ -7,6 +7,8 @@ from typing import List, Tuple, Any
 from pysmt.smtlib.parser import SmtLibParser, SmtLibScript
 from pysmt.environment import get_env
 
+from more_itertools import peekable
+
 class Stmt(object):
 
     def __init__(self, name, serialized):
@@ -99,15 +101,32 @@ class AssertStmt(Stmt):
             "concat" : self.concat_handler,
             "select" : self.select_handler,
         }
+        self.vars = {}
+        self.tokenizer = peekable(self.tokens)
+        self.new_tokens = self.simplify_tokens(self.tokens)
+        print(self.new_tokens)
 
-    def get_token(self):
-        for token in self.tokens:
-            yield token
+    def simplify_tokens(self, tokens):
+        new_tokens = []
+        for token in tokens:
+            if isinstance(token, list):
+                if len(token) == 1 and isinstance(token[0], list):
+                    token = token[0]
+                new_tokens.append(self.simplify_tokens(token))
+            else:
+                new_tokens.append(token)
+        return new_tokens
 
 
-    def parse_stmt(self, tokens):
+
+    def parse_stmt(self, tokens = None):
         substmts = []
-        print(tokens)
+        # while True:
+        #     try:
+        #         token = next(self.tokenizer)
+        #     except StopIteration:
+        #         break
+        #print(tokens)
         for token in tokens:
             if isinstance(token, str):
                 # if token can be ignored, ignore it
@@ -126,8 +145,13 @@ class AssertStmt(Stmt):
                 substmts.append(self.parse_stmt(token))
         return substmts
 
+    def parse_expr(self, element):
+        pass
+
     def let_handler(self):
-        print("let")
+        let_element = next(self.tokenizer)
+        #print(let_element)
+        let_result = self.parse_stmt(let_element)      
 
     def concat_handler(self):
         print("concat")
