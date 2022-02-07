@@ -195,6 +195,10 @@ class AssertStmt(Stmt):
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
                     return f"{arg1} + {arg2}"
+                elif func == "bvsub":
+                    arg1 = self.get_value(arg1)
+                    arg2 = self.get_value(arg2)
+                    return f"{arg1} - {arg2}" 
                 elif func == "and":
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
