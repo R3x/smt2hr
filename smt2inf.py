@@ -139,7 +139,6 @@ class AssertStmt(Stmt):
                     let_token = token[1]
                     expr = self.parse_expr(let_token[1])
                     self.smt_vars[let_token[0]] = expr
-                    print(self.smt_vars)
                     token = token[2:]
                 elif isinstance(token, list):
                     token = token[0]
