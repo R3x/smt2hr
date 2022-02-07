@@ -115,12 +115,14 @@ class AssertStmt(Stmt):
 
 
     def parse_stmt(self, tokens = None):
-        for token in tokens:
+        token = tokens[1]
+        while True:
             if isinstance(token, str):
                 # if token can be ignored, ignore it
                 # all smt2 tokens are ignored
-                if token in self.ignore_tokens_list:
-                    continue
+                # if token in self.ignore_tokens_list:
+                #     token = tokens[1] 
+                #     continue
                 if self.is_variable(token):
                     return self.smt_vars[token]
                 # if the token is the arg let's save it
@@ -138,7 +140,11 @@ class AssertStmt(Stmt):
                     expr = self.parse_expr(let_token[1])
                     self.smt_vars[let_token[0]] = expr
                     print(self.smt_vars)
-                    self.parse_stmt(token[2:])
+                    token = token[2:]
+                elif isinstance(token, list):
+                    token = token[0]
+                else:
+                    raise ValueError(f"Unexpected token: {token}")
 
     def parse_expr(self, tokens):
         if isinstance(tokens, list):
