@@ -98,6 +98,7 @@ class AssertStmt(Stmt):
         super().__init__(name, serialized)
         self.program_var_sizes = {}
         self.smt_vars = {}
+        print(self.serialized)
         self.tokenizer = peekable(self.tokens)
         self.tokens = self.simplify_tokens(self.tokens)
 
@@ -178,31 +179,31 @@ class AssertStmt(Stmt):
                 elif func == "bvmul":
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
-                    return f"{arg1} * {arg2}"
+                    return f"({arg1} * {arg2})"
                 elif func == "=":
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
-                    return f"{arg1} == {arg2}"
+                    return f"({arg1} == {arg2})"
                 elif func == "bvslt":
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
-                    return f"{arg1} < {arg2}"
+                    return f"({arg1} < {arg2})"
                 elif func == "bvurem":
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
-                    return f"{arg1} % {arg2}"
+                    return f"({arg1} % {arg2})"
                 elif func == "bvadd":
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
-                    return f"{arg1} + {arg2}"
+                    return f"({arg1} + {arg2})"
                 elif func == "bvsub":
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
-                    return f"{arg1} - {arg2}" 
+                    return f"({arg1} - {arg2})" 
                 elif func == "and":
                     arg1 = self.get_value(arg1)
                     arg2 = self.get_value(arg2)
-                    return f"{arg1} and {arg2}"
+                    return f"({arg1} and {arg2})"
                 else:
                     raise ValueError("Unknown operation: " + func)
             if isinstance(tokens[0], list):
@@ -228,9 +229,12 @@ class AssertStmt(Stmt):
     def get_value(self, name):
         if self.is_variable(name):
             return self.smt_vars[name]
+        elif self.is_bitvector(name):
+            return int(name.replace("#b", ""), 2)
+        elif name in ["true", "false"]:
+            return name
         else:
-            if self.is_bitvector(name):
-                return int(name.replace("#b", ""), 2)
+            raise ValueError("Unknown value: " + name)
 
     def is_variable(self, name):
         if name.startswith(".def"):
