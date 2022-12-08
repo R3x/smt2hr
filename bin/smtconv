@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+
+import smt2hr
+import click
+
+@click.command()
+# target file
+@click.argument('filename', type=click.Path(exists=True))
+@click.option('--output', '-o', type=click.Path(exists=False), default='output.smt2')
+@click.option('--stdout', '-s', is_flag=True, default=False, help='Print to stdout instead of file.')
+def main(filename, output, stdout):
+    if filename is None:
+        print("Please specify a file to convert.")
+        return
+    
+    with open(filename, 'r') as f:
+        script = smt2hr.parse(f)
+        if stdout:
+            print(script)
+        else:
+            with open(output, 'w') as f:
+                f.write(script)
+
+if __name__ == "__main__":
+    main()
+
