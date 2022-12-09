@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import smt2hr
 import click
 
@@ -8,13 +9,22 @@ import click
 @click.argument('filename', type=click.Path(exists=True))
 @click.option('--output', '-o', type=click.Path(exists=False), default='output.smt2')
 @click.option('--stdout', '-s', is_flag=True, default=False, help='Print to stdout instead of file.')
-def main(filename, output, stdout):
+@click.option('--varmap', '-v', type=click.Path(exists=False), default=None, help="File containing variable name mapping.")
+@click.option('--griller', '-g', is_flag=True, default=False, help="Use griller's variable name scheme")
+@click.option('--pretty', '-p', is_flag=True, default=False, help="Pretty print the output")
+@click.version_option(version='0.1.0')
+def main(filename, output, stdout, varmap, griller, pretty):
     if filename is None:
         print("Please specify a file to convert.")
         return
-    
+
+    json_map = None
+    if varmap is not None:
+        with open(varmap, 'r') as f:
+            json_map = json.load(f) 
+
     with open(filename, 'r') as f:
-        script = smt2hr.parse(f)
+        script = smt2hr.parse(f, pretty)
         if stdout:
             print(script)
         else:

@@ -2,7 +2,7 @@ import pysmt
 import re
 from pysmt.smtlib.parser import SmtLibParser
 
-def parse(fp):
+def parse(fp, pretty=False):
     p = SmtLibParser()
     script = p.get_script(fp)
     ret = ""
@@ -14,7 +14,10 @@ def parse(fp):
         # print(asserts.args[0].serialize())
         # print("-----------------")
         tokens = Tokenizer(asserts.args[0].serialize())
-        ret += tokens.tokens_to_string()
+        if pretty:
+            ret += tokens.pretty_print()
+        else:
+            ret += tokens.tokens_to_string()
         ret += '\n\n'
     return ret[:-2]
 
@@ -194,6 +197,57 @@ class Tokenizer():
             else:
                 ret += " " + self.tokens[i]
         return ret
+
+    def specific_tokens_to_string(self, tokens):
+        ret = ""
+        for i in range(len(tokens)):
+            if tokens[i] == "(" or tokens[i] == ")":
+                ret += tokens[i]
+            elif tokens[i - 1] == "(" or tokens[i - 1] == ")":
+                ret += tokens[i]
+            else:
+                ret += " " + tokens[i]
+        return ret
+
+    def split_tokens(self, tokens):
+        # We remove the first and last ( and )
+        if tokens[0] != "(" or tokens[-1] != ")":
+            return "\t" + self.specific_tokens_to_string(tokens)
+        if tokens[1] != "(":
+            return "\t" + self.specific_tokens_to_string(tokens)
+        del tokens[0]
+        del tokens[-1]
+
+        indent = 0 
+        for i in range(len(tokens)):
+            if tokens[i] == "(":
+                indent += 1
+                endline = True
+            elif tokens[i] == ")":
+                indent -= 1
+                endline = True
+        
+            if indent == 0:
+                # We got the split point
+                return self.split_tokens(tokens[:i+1]) + "\n\t" + self.specific_tokens_to_string(tokens[i+1:])
+
+    def pretty_print(self):
+        ret = ""
+        indent = 0
+        endline = False
+        
+        initial = 0
+        for i in range(len(self.tokens)):
+            if self.tokens[i] == "(":
+                initial += 1
+            else:
+                break
+    
+        ret += self.split_tokens(self.tokens.copy())
+        return ret
+                    
+
+            
 
 def remove_bit_width(data):
     return tokens.tokens_to_string()
